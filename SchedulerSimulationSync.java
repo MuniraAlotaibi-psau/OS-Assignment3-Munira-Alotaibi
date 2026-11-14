@@ -298,6 +298,7 @@ class CpuWorker extends Thread {
 }
 
 public class SchedulerSimulationSync {
+private final java.util.concurrent.locks.ReentrantLock queueLock = new java.util.concurrent.locks.ReentrantLock();
     public static void main(String[] args) {
         // ⚠️ IMPORTANT: Put your student ID here to seed the random number generator
         // This makes your output unique to you - DO NOT forget to change this!
@@ -328,7 +329,12 @@ public class SchedulerSimulationSync {
         for (int i = 0; i < numProcesses; i++) {
             Process process = new Process("P" + (i + 1), burstTimes[i], timeQuantum, 1 + priorityRandom.nextInt(10));
             allProcesses.add(process);
-            readyQueue.add(process);
+            queueLock.lock();
+try {
+    readyQueue.add(process);
+} finally {
+    queueLock.unlock();
+}
         }
 
         System.out.println("\n" + Colors.BOLD + Colors.GREEN + "╔════════════════════════════════════════════════════════════════════════════════╗" + Colors.RESET);
