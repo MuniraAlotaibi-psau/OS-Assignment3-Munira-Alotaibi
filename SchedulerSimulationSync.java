@@ -59,7 +59,8 @@ class SharedStats {
     static long totalServiceTime = 0;         // shared accumulator: sum of the CPU time (ms) actually executed
     // Number of times a CPU found the ready queue empty and polled it again (busy waiting). Must be 0 after Feature 3.
     static final java.util.concurrent.atomic.AtomicInteger busyWaitPolls = new java.util.concurrent.atomic.AtomicInteger(0);
-
+    
+    public static final java.util.concurrent.locks.ReentrantLock statsLock = new java.util.concurrent.locks.ReentrantLock();
     // TODO Feature 2: declare the lock(s) protecting the three shared variables above here.
     // Think about it: ONE lock for the three variables, or ONE lock PER variable? (you must justify it in MY_WORK.md)
 
