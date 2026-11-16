@@ -142,6 +142,7 @@ class ReadyQueue {
 
     // TODO Feature 3: declare the counting semaphore that counts the processes waiting in the ready queue here
 
+    public static final java.util.concurrent.Semaphore readyQueueSemaphore = new java.util.concurrent.Semaphore(0);
     // Add a process to the ready queue (new process, or a process that did not finish its quantum)
     public void add(Process process) {
         // TODO Feature 1: protect this critical section
@@ -150,6 +151,7 @@ class ReadyQueue {
         map.put(thread, process);
 
         // TODO Feature 3: signal that one more process is available in the queue
+            readyQueueSemaphore.release();
 
         System.out.println(Colors.BLUE + "  ➕ " + Colors.BOLD + Colors.CYAN + process.getName() + Colors.RESET +
                 Colors.BLUE + " (Priority: " + process.getPriority() + ") added to ready queue" + Colors.RESET +
@@ -158,17 +160,19 @@ class ReadyQueue {
     }
 
     // Remove and return the thread at the head of the queue (or null if the queue is empty)
-    public Thread poll() {
-        // TODO Feature 1: protect this critical section
-        if (list.isEmpty()) {
-            return null;
-        }
-        Thread head = list.getFirst();      // 1) read the head of the queue
-        RaceWindow.pause();                 //    <- another CPU can read the SAME head here
-        list.removeFirst();                 // 2) remove the head (it may be a different thread by now!)
-        return head;
-    }
+    public Thread poll() throws InterruptedException {
+       // TODO Feature 3: wait until at least one process is available in the queue
+          readyQueueSemaphore.acquire();
 
+       // TODO Feature 1: protect this critical section
+        if (list.isEmpty()) {
+             return null;
+      }
+       Thread head = list.getFirst(); // 1) read the head of the queue
+       Racewindow.pause();
+       list.removeFirst(); // 2) remove the head
+       return head;
+}
     public Process processOf(Thread thread) {
         // TODO Feature 1: protect this access
         return map.get(thread);
